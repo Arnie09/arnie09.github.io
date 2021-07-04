@@ -5,7 +5,7 @@ title: (MIGRATED) ThoughtWorks Interview Experience!
 
 ThoughtWorks came in my college around end July. Their interviews are quite famous for being very open ended and covering vast topics. So here is my experience of the whole recruitment process. 
 
-There were  rounds:
+There were the following rounds:
 - A coding round
 - A OA round with MCQs and Coding
 - A Code pairing Round
