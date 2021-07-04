@@ -1,6 +1,6 @@
 ---
 layout: post
-title: (MIGRATED) HackerEarth Interview Experience!
+title: (MIGRATED) ThoughtWorks Interview Experience!
 ---
 
 ThoughtWorks came in my college around end July. Their interviews are quite famous for being very open ended and covering vast topics. So here is my experience of the whole recruitment process. 
