@@ -1,1 +1,156 @@
-<h1>Hello World</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arnab Chanda - Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            font-family: 'Source Code Pro', monospace;
+            display: flex;
+            flex-direction: column;
+            background-color: #121212;
+            color: #00ff00;
+            overflow: hidden;
+        }
+        header {
+            background: #1a1a1a;
+            text-align: center;
+            padding: 2rem 1rem;
+            position: relative;
+            z-index: 10;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        .section {
+            margin-bottom: 2rem;
+        }
+        h2 {
+            color: #00ff00;
+            font-size: 1.8rem;
+        }
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            background: #1a1a1a;
+            position: relative;
+            z-index: 10;
+        }
+        a {
+            color: #00ff00;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            .container {
+                padding: 0 0.5rem;
+            }
+            .section {
+                margin-bottom: 1.5rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            p {
+                font-size: 0.95rem;
+            }
+        }
+        .binary-code {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .binary-code span {
+            position: absolute;
+            color: rgba(0, 255, 0, 0.2);
+            font-size: 1rem;
+            animation: fade 4s infinite;
+        }
+        @keyframes fade {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="binary-code"></div>
+    <header>
+        <h1>Arnab Chanda</h1>
+        <p>Senior Software Engineer</p>
+    </header>
+    
+    <div class="container">
+        <section class="section">
+            <h2>About Me</h2>
+            <p>I'm Arnab Chanda, a passionate software engineer with <span id="experience-years"></span> years of experience. I have worked extensively on web applications in the sales tech, gaming, and medical domains. I specialize in Ruby on Rails, Django, and React. Currently, I work at apollo.io, where I contribute to building scalable web applications.</p>
+        </section>
+        
+        <section class="section">
+            <h2>Experience</h2>
+            <p><strong>Apollo.io</strong> - Senior Backend Engineer (Current)</p>
+            <p><strong>Thoughtworks</strong> - Application Developer (Previous)</p>
+        </section>
+        
+        <section class="section">
+            <h2>Contact & Links</h2>
+            <p>If you're interested in hiring me for a software engineering gig, feel free to drop me an email at <a href="mailto:arnabchanda964@gmail.com">arnabchanda964@gmail.com</a>.</p>
+            <p><a href="https://www.linkedin.com/in/arnab-chanda-aa671017a/">LinkedIn</a></p>
+            <p><a href="https://github.com/Arnie09">GitHub</a></p>
+            <p><a href="https://drive.google.com/file/d/1YD6E0iOtUriNArSJ4c7T3_cc5d39_3Jq/view?usp=sharing">Resume</a></p>
+            <p><a href="https://www.instagram.com/arnaaabbb/">Instagram</a></p>
+        </section>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Arnab Chanda. All Rights Reserved.</p>
+        <script>
+        const startYear = 2021;
+        const currentYear = new Date().getFullYear();
+        const experienceYears = currentYear - startYear;
+        document.getElementById('experience-years').textContent = experienceYears;
+    </script>
+    </footer>
+
+    <script>
+        const binaryContainer = document.querySelector('.binary-code');
+        const binaryChars = '01';
+        for (let i = 0; i < 300; i++) {
+            const span = document.createElement('span');
+            span.textContent = binaryChars[Math.floor(Math.random() * binaryChars.length)];
+            span.style.left = `${Math.random() * 100}%`;
+            span.style.top = `${Math.random() * 100}%`;
+            span.style.animationDelay = `${Math.random() * 4}s`;
+            binaryContainer.appendChild(span);
+        }
+    </script>
+</body>
+</html>
