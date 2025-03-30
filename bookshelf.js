@@ -36,7 +36,7 @@ async function fetchBooks(endpoint) {
 
         while (hasMore) {
             const response = await fetch(
-                `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}`,
+                `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`,
                 fetchOptions
             );
             const data = await response.json();
@@ -54,8 +54,6 @@ async function fetchBooks(endpoint) {
                 page++;
             }
         }
-
-        console.log(`Total ${endpoint} books fetched:`, allBooks.length);
         return allBooks;
     } catch (error) {
         console.error(`Error fetching ${endpoint} books:`, error);
@@ -208,7 +206,14 @@ async function displayBooks() {
     // Set loading state for all sections
     sections.forEach(section => {
         const container = document.getElementById(section.id);
-        container.innerHTML = '<div class="loading">Loading books...</div>';
+        container.innerHTML = `
+            <div class="loading-container">
+                <div class="cyber-loader">
+                    <div class="cyber-loader__inner"></div>
+                    <div class="cyber-loader__text">Loading books...</div>
+                </div>
+            </div>
+        `;
     });
 
     // Fetch all sections in parallel
@@ -227,7 +232,7 @@ async function displayBooks() {
         results.forEach(({ id, books }) => {
             const container = document.getElementById(id);
             if (books.length === 0) {
-                container.innerHTML = '<div class="loading">No books found</div>';
+                container.innerHTML = '<div class="loading-container"><div class="cyber-loader"><div class="cyber-loader__text">No books found</div></div></div>';
             } else {
                 const bookCards = books.map((book) => createBookCard(book)).join('');
                 container.innerHTML = bookCards;
@@ -240,7 +245,7 @@ async function displayBooks() {
         console.error('Error fetching books:', error);
         sections.forEach(section => {
             const container = document.getElementById(section.id);
-            container.innerHTML = '<div class="loading">Error loading books. Please try again later.</div>';
+            container.innerHTML = '<div class="loading-container"><div class="cyber-loader"><div class="cyber-loader__text">Error loading books</div></div></div>';
         });
     }
 }
