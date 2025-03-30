@@ -164,6 +164,7 @@ a:hover {
     position: relative;
     z-index: 1;
     cursor: pointer;
+    min-height: 400px;
 }
 
 .book-card:hover {
@@ -186,6 +187,7 @@ a:hover {
     transition: opacity 0.3s ease;
     opacity: 0;
     filter: blur(10px);
+    background: #2a2a2a;
 }
 
 .book-cover.loaded {
@@ -196,18 +198,24 @@ a:hover {
 .book-info {
     padding: 1rem;
     background: rgba(26, 26, 26, 0.95);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 150px;
 }
 
 .book-title {
     font-size: 1.1rem;
     margin: 0 0 0.5rem 0;
     color: #00ff00;
+    min-height: 1.5em;
 }
 
 .book-author {
     font-size: 0.9rem;
     color: #888;
     margin: 0 0 0.5rem 0;
+    min-height: 1.2em;
 }
 
 .book-details {
@@ -219,6 +227,13 @@ a:hover {
     border-radius: 4px;
     padding: 0.5rem;
     margin-top: 0.5rem;
+    min-height: 100px;
+}
+
+.book-year, .book-rating {
+    margin: 0.3rem 0;
+    color: #00ff00;
+    min-height: 1.2em;
 }
 
 .book-subjects {
@@ -250,7 +265,20 @@ a:hover {
         gap: 1rem;
     }
     
+    .book-card {
+        min-height: 350px;
+    }
+    
     .book-cover-container {
         height: 200px;
     }
+    
+    .book-info {
+        min-height: 150px;
+    }
+}
+
+/* Optimize first 4 cards for LCP */
+.book-card:nth-child(-n+4) {
+    content-visibility: visible;
 } 

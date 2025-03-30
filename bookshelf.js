@@ -89,8 +89,9 @@ function createBookCard(book) {
         ? `${COVER_BASE_URL}${coverId}-S.jpg`
         : 'https://via.placeholder.com/50x75?text=No+Cover';
 
-    const description = book.details.description;
-    const subjects = book.details.subjects.slice(0, 3).join(', ');
+    const rating = book.details.ratings.average.toFixed(1);
+    const ratingCount = book.details.ratings.count;
+    const year = book.details.first_publish_year;
     
     return `
         <div class="book-card">
@@ -107,10 +108,6 @@ function createBookCard(book) {
             <div class="book-info">
                 <h3 class="book-title">${book.work.title}</h3>
                 <p class="book-author">${book.work.author_names.join(', ')}</p>
-                <div class="book-details">
-                    <p class="book-subjects">${subjects}</p>
-                    <p class="book-description">${description}</p>
-                </div>
             </div>
         </div>
     `;
@@ -164,8 +161,8 @@ async function displayBooks() {
             if (books.length === 0) {
                 container.innerHTML = '<div class="loading">No books found</div>';
             } else {
-                const bookCards = books.map(createBookCard).filter(card => card !== '');
-                container.innerHTML = bookCards.join('');
+                const bookCards = books.map((book) => createBookCard(book)).join('');
+                container.innerHTML = bookCards;
             }
         });
 
