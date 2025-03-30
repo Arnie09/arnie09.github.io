@@ -75,15 +75,115 @@ a:hover {
     }
     .container {
         padding: 0 0.5rem;
+        width: 100%;
+        max-width: 100%;
+        margin: 1rem auto;
     }
     .section {
         margin-bottom: 1.5rem;
+        width: 100%;
     }
     h2 {
         font-size: 1.5rem;
+        text-align: center;
     }
     p {
         font-size: 0.95rem;
+        text-align: center;
+    }
+    
+    .books-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+        padding: 0.5rem;
+        width: 100%;
+        justify-items: center;
+        max-width: 100%;
+    }
+    
+    .book-card {
+        min-height: 350px;
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+    }
+    
+    .book-cover-container {
+        height: 200px;
+    }
+    
+    .book-info {
+        min-height: 150px;
+        padding: 0.75rem;
+    }
+
+    .book-title {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .book-author {
+        font-size: 0.85rem;
+        text-align: center;
+    }
+
+    .info-icon {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .modal-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+    .modal-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .modal-cover {
+        width: 180px;
+        height: 250px;
+        margin: 0 auto;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5rem;
+        text-align: center;
+        flex: 1;
+    }
+
+    .modal-details {
+        text-align: center;
+    }
+
+    .modal-author {
+        font-size: 1.1rem;
+    }
+
+    .loading-container {
+        min-height: 150px;
+    }
+
+    .cyber-loader {
+        width: 100%;
+    }
+
+    .cyber-loader__inner {
+        width: 50px;
+        height: 50px;
+    }
+
+    .cyber-loader__text {
+        font-size: 0.8rem;
+        text-align: center;
+        width: 100%;
     }
 }
 
@@ -151,6 +251,9 @@ a:hover {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1.5rem;
     padding: 1rem 0;
+    justify-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .book-card {
@@ -296,25 +399,6 @@ a:hover {
     font-style: italic;
 }
 
-@media (max-width: 768px) {
-    .books-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 1rem;
-    }
-    
-    .book-card {
-        min-height: 350px;
-    }
-    
-    .book-cover-container {
-        height: 200px;
-    }
-    
-    .book-info {
-        min-height: 150px;
-    }
-}
-
 /* Optimize first 4 cards for LCP */
 .book-card:nth-child(-n+4) {
     content-visibility: visible;
@@ -417,23 +501,6 @@ a:hover {
     color: #888;
     line-height: 1.6;
     margin: 0;
-}
-
-@media (max-width: 768px) {
-    .modal-body {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .modal-cover {
-        width: 200px;
-        height: 280px;
-        margin: 0 auto;
-    }
-
-    .modal-header h2 {
-        font-size: 1.5rem;
-    }
 }
 
 .loading-container {
