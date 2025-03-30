@@ -61,7 +61,7 @@ async function fetchBooks(endpoint) {
     }
 }
 
-function createBookCard(book) {
+function createBookCard(book, index) {
     if (!book.work) {
         console.error('Invalid book data:', book);
         return '';
@@ -77,6 +77,9 @@ function createBookCard(book) {
 
     const year = book.work.first_publish_year || book.work.first_publish_date?.split('-')[0] || 'Unknown';
     
+    // Preload first 4 images for LCP optimization
+    const loading = index < 4 ? 'eager' : 'lazy';
+    
     return `
         <div class="book-card">
             <div class="book-cover-container">
@@ -85,7 +88,7 @@ function createBookCard(book) {
                     src="${thumbnailUrl}"
                     data-src="${coverUrl}"
                     alt="${book.work.title}"
-                    loading="lazy"
+                    loading="${loading}"
                     onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'"
                 >
             </div>
@@ -234,7 +237,7 @@ async function displayBooks() {
             if (books.length === 0) {
                 container.innerHTML = '<div class="loading-container"><div class="cyber-loader"><div class="cyber-loader__text">No books found</div></div></div>';
             } else {
-                const bookCards = books.map((book) => createBookCard(book)).join('');
+                const bookCards = books.map((book, index) => createBookCard(book, index)).join('');
                 container.innerHTML = bookCards;
             }
         });
