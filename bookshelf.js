@@ -17,17 +17,13 @@ async function fetchBookDetails(workKey) {
         const data = await response.json();
         return {
             description: data.description?.value || data.description || 'No description available',
-            first_publish_year: data.first_publish_year || 'Unknown',
-            subjects: data.subjects || [],
-            ratings: data.ratings || { average: 0, count: 0 }
+            subjects: data.subjects || []
         };
     } catch (error) {
         console.error('Error fetching book details:', error);
         return {
             description: 'No description available',
-            first_publish_year: 'Unknown',
-            subjects: [],
-            ratings: { average: 0, count: 0 }
+            subjects: []
         };
     }
 }
@@ -50,15 +46,7 @@ async function fetchBooks(endpoint) {
                 continue;
             }
 
-            // Fetch additional details for each book
-            const booksWithDetails = await Promise.all(
-                data.reading_log_entries.map(async (entry) => {
-                    const details = await fetchBookDetails(entry.work.key);
-                    return { ...entry, details };
-                })
-            );
-
-            allBooks = allBooks.concat(booksWithDetails);
+            allBooks = allBooks.concat(data.reading_log_entries);
             
             if (allBooks.length >= data.numFound) {
                 hasMore = false;
@@ -89,11 +77,7 @@ function createBookCard(book) {
         ? `${COVER_BASE_URL}${coverId}-S.jpg`
         : 'https://via.placeholder.com/50x75?text=No+Cover';
 
-    const rating = book.details.ratings.average.toFixed(1);
-    const ratingCount = book.details.ratings.count;
-    const year = book.details.first_publish_year;
-    const description = book.details.description;
-    const subjects = book.details.subjects.slice(0, 3).join(', ');
+    const year = book.work.first_publish_year || book.work.first_publish_date?.split('-')[0] || 'Unknown';
     
     return `
         <div class="book-card">
@@ -120,7 +104,7 @@ function createBookCard(book) {
     `;
 }
 
-function showBookModal(book) {
+async function showBookModal(book) {
     // Create modal container
     const modalContainer = document.createElement('div');
     modalContainer.className = 'modal-container';
@@ -135,6 +119,9 @@ function showBookModal(book) {
         ? `${COVER_BASE_URL}${coverId}-M.jpg`
         : 'https://via.placeholder.com/300x400?text=No+Cover';
     
+    const year = book.work.first_publish_year || book.work.first_publish_date?.split('-')[0] || 'Unknown';
+    
+    // Show loading state
     modalContent.innerHTML = `
         <div class="modal-header">
             <h2>${book.work.title}</h2>
@@ -146,10 +133,8 @@ function showBookModal(book) {
             </div>
             <div class="modal-details">
                 <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
-                <p class="modal-year">Published: ${book.details.first_publish_year || 'Unknown'}</p>
-                <p class="modal-rating">Rating: ${book.details.ratings.average.toFixed(1)} ⭐ (${book.details.ratings.count} ratings)</p>
-                <p class="modal-subjects">Genres: ${book.details.subjects.slice(0, 3).join(', ')}</p>
-                <p class="modal-description">${book.details.description || 'No description available'}</p>
+                <p class="modal-year">Published: ${year}</p>
+                <div class="loading">Loading details...</div>
             </div>
         </div>
     `;
@@ -159,6 +144,27 @@ function showBookModal(book) {
     
     // Prevent body scrolling
     document.body.style.overflow = 'hidden';
+    
+    // Fetch book details
+    try {
+        const details = await fetchBookDetails(book.work.key);
+        const detailsContainer = modalContent.querySelector('.modal-details');
+        detailsContainer.innerHTML = `
+            <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
+            <p class="modal-year">Published: ${year}</p>
+            <p class="modal-subjects">Genres: ${details.subjects.slice(0, 3).join(', ')}</p>
+            <p class="modal-description">${details.description}</p>
+        `;
+    } catch (error) {
+        console.error('Error fetching book details:', error);
+        const detailsContainer = modalContent.querySelector('.modal-details');
+        detailsContainer.innerHTML = `
+            <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
+            <p class="modal-year">Published: ${year}</p>
+            <p class="modal-subjects">Genres: Not available</p>
+            <p class="modal-description">No description available</p>
+        `;
+    }
     
     // Add event listeners
     const closeBtn = modalContainer.querySelector('.close-modal');
