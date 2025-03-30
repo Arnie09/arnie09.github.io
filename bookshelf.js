@@ -92,6 +92,8 @@ function createBookCard(book) {
     const rating = book.details.ratings.average.toFixed(1);
     const ratingCount = book.details.ratings.count;
     const year = book.details.first_publish_year;
+    const description = book.details.description;
+    const subjects = book.details.subjects.slice(0, 3).join(', ');
     
     return `
         <div class="book-card">
@@ -108,9 +110,69 @@ function createBookCard(book) {
             <div class="book-info">
                 <h3 class="book-title">${book.work.title}</h3>
                 <p class="book-author">${book.work.author_names.join(', ')}</p>
+                <button class="info-icon" onclick="showBookModal(${JSON.stringify(book).replace(/"/g, '&quot;')})" aria-label="View book details">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                </button>
             </div>
         </div>
     `;
+}
+
+function showBookModal(book) {
+    // Create modal container
+    const modalContainer = document.createElement('div');
+    modalContainer.className = 'modal-container';
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    
+    // Get the existing cover image URL from the book card
+    const coverId = book.work.cover_id;
+    const coverUrl = coverId 
+        ? `${COVER_BASE_URL}${coverId}-M.jpg`
+        : 'https://via.placeholder.com/300x400?text=No+Cover';
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>${book.work.title}</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-cover">
+                <img src="${coverUrl}" alt="${book.work.title}">
+            </div>
+            <div class="modal-details">
+                <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
+                <p class="modal-year">Published: ${book.details.first_publish_year || 'Unknown'}</p>
+                <p class="modal-rating">Rating: ${book.details.ratings.average.toFixed(1)} ⭐ (${book.details.ratings.count} ratings)</p>
+                <p class="modal-subjects">Genres: ${book.details.subjects.slice(0, 3).join(', ')}</p>
+                <p class="modal-description">${book.details.description || 'No description available'}</p>
+            </div>
+        </div>
+    `;
+    
+    modalContainer.appendChild(modalContent);
+    document.body.appendChild(modalContainer);
+    
+    // Prevent body scrolling
+    document.body.style.overflow = 'hidden';
+    
+    // Add event listeners
+    const closeBtn = modalContainer.querySelector('.close-modal');
+    closeBtn.addEventListener('click', () => {
+        modalContainer.remove();
+        document.body.style.overflow = ''; // Restore scrolling
+    });
+    
+    modalContainer.addEventListener('click', (e) => {
+        if (e.target === modalContainer) {
+            modalContainer.remove();
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    });
 }
 
 function setupLazyLoading() {
