@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arnab Chanda - Portfolio</title>
+    <title>Bookshelf - Arnab Chanda</title>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="binary-code"></div>
     <header>
-        <h1>Arnab Chanda</h1>
-        <p>Senior Software Engineer</p>
+        <h1>Bookshelf</h1>
+        <p>A collection of books I've read and recommend</p>
         <div class="button-container">
-            <a href="bookshelf.html" class="nav-button">Bookshelf</a>
+            <a href="index.html" class="nav-button">Home</a>
             <a href="https://www.linkedin.com/in/arnab-chanda-aa671017a/" class="nav-button">LinkedIn</a>
             <a href="https://github.com/Arnie09" class="nav-button">GitHub</a>
             <a href="https://drive.google.com/file/d/1YD6E0iOtUriNArSJ4c7T3_cc5d39_3Jq/view?usp=sharing" class="nav-button">Resume</a>
@@ -23,18 +23,25 @@
     
     <div class="container">
         <section class="section">
-            <h2>About Me</h2>
-            <p>I'm Arnab Chanda, a passionate software engineer with <span id="experience-years"></span> years of experience. I have worked extensively on web applications in the sales tech, gaming, and medical domains. I specialize in Ruby on Rails, Django, and React. Currently, I work at apollo.io, where I contribute to building scalable web applications.</p>
+            <h2>Currently Reading</h2>
+            <div class="books-grid" id="currently-reading">
+                <div class="loading">Loading...</div>
+            </div>
         </section>
         
         <section class="section">
-            <h2>Experience</h2>
-            <p><strong>Apollo.io</strong> - Senior Backend Engineer (Current)</p>
-            <p><strong>Thoughtworks</strong> - Application Developer (Previous)</p>
-            
+            <h2>Want to Read</h2>
+            <div class="books-grid" id="want-to-read">
+                <div class="loading">Loading...</div>
+            </div>
         </section>
-
-        <p class="contact-email">If you're interested in hiring me for a software engineering gig, feel free to drop me an email at <a href="mailto:arnabchanda964@gmail.com">arnabchanda964@gmail.com</a></p>
+        
+        <section class="section">
+            <h2>Already Read</h2>
+            <div class="books-grid" id="already-read">
+                <div class="loading">Loading...</div>
+            </div>
+        </section>
     </div>
     
     <footer>
@@ -42,5 +49,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="bookshelf.js"></script>
 </body>
-</html>
+</html> 
