@@ -89,6 +89,8 @@ function createBookCard(book, index) {
                     data-src="${coverUrl}"
                     alt="${book.work.title}"
                     loading="${loading}"
+                    width="180"
+                    height="250"
                     onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'"
                 >
             </div>
@@ -235,10 +237,20 @@ async function displayBooks() {
         results.forEach(({ id, books }) => {
             const container = document.getElementById(id);
             if (books.length === 0) {
-                container.innerHTML = '<div class="loading-container"><div class="cyber-loader"><div class="cyber-loader__text">No books found</div></div></div>';
+                container.innerHTML = `
+                    <div class="loading-container">
+                        <div class="cyber-loader">
+                            <div class="cyber-loader__text">No books found</div>
+                        </div>
+                    </div>
+                `;
             } else {
                 const bookCards = books.map((book, index) => createBookCard(book, index)).join('');
-                container.innerHTML = bookCards;
+                container.innerHTML = `
+                    <div class="books-grid">
+                        ${bookCards}
+                    </div>
+                `;
             }
         });
 
@@ -248,7 +260,13 @@ async function displayBooks() {
         console.error('Error fetching books:', error);
         sections.forEach(section => {
             const container = document.getElementById(section.id);
-            container.innerHTML = '<div class="loading-container"><div class="cyber-loader"><div class="cyber-loader__text">Error loading books</div></div></div>';
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="cyber-loader">
+                        <div class="cyber-loader__text">Error loading books</div>
+                    </div>
+                </div>
+            `;
         });
     }
 }
