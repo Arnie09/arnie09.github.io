@@ -102,18 +102,17 @@ a:hover {
     }
     
     .book-card {
-        min-height: 350px;
-        width: 100%;
-        max-width: 200px;
-        margin: 0 auto;
+        width: 140px;
+        height: 350px;
     }
     
     .book-cover-container {
         height: 200px;
+        padding: 0.75rem;
     }
     
     .book-info {
-        min-height: 150px;
+        height: 150px;
         padding: 0.75rem;
     }
 
@@ -267,7 +266,8 @@ a:hover {
     position: relative;
     z-index: 1;
     cursor: pointer;
-    min-height: 400px;
+    width: 180px;
+    height: 400px;
 }
 
 .book-card:hover {
@@ -281,16 +281,23 @@ a:hover {
     height: 250px;
     background: #2a2a2a;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .book-cover {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: opacity 0.3s ease;
     opacity: 0;
     filter: blur(10px);
     background: #2a2a2a;
+    display: block;
+    margin: 0 auto;
 }
 
 .book-cover.loaded {
@@ -304,8 +311,9 @@ a:hover {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 150px;
+    height: 150px;
     position: relative;
+    box-sizing: border-box;
 }
 
 .book-title {
@@ -472,12 +480,16 @@ a:hover {
     overflow: hidden;
     border-radius: 8px;
     border: 1px solid rgba(0, 255, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-cover img {
-    width: 100%;
+    width: auto;
     height: 100%;
-    object-fit: cover;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .modal-details {
