@@ -574,13 +574,21 @@ a:hover {
 }
 
 .cyber-loader__text {
-    color: #00ff00;
-    font-family: 'Source Code Pro', monospace;
-    font-size: 0.9rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    position: relative;
+    color: #00ff00;
     text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    margin-top: 1rem;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .cyber-loader__text::after {

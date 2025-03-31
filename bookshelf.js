@@ -15,15 +15,66 @@ const fetchOptions = {
     cache: 'no-cache'
 };
 
+// Add debug panel HTML at the start of the file
+const DEBUG_PANEL = `
+    <div id="debug-panel" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); color: #00ff00; padding: 10px; max-height: 50vh; overflow-y: auto; z-index: 9999; font-family: monospace; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin: 0;">Debug Info</h3>
+            <button onclick="toggleDebugPanel()" style="background: #00ff00; color: black; border: none; padding: 5px 10px; cursor: pointer;">Toggle</button>
+        </div>
+        <div id="debug-content"></div>
+    </div>
+`;
+
+// Add debug panel functions
+function addDebugInfo(message) {
+    const debugContent = document.getElementById('debug-content');
+    if (debugContent) {
+        const entry = document.createElement('div');
+        entry.style.marginBottom = '5px';
+        entry.style.padding = '5px';
+        entry.style.borderBottom = '1px solid rgba(0,255,0,0.2)';
+        entry.textContent = message;
+        debugContent.appendChild(entry);
+        debugContent.scrollTop = debugContent.scrollHeight;
+    }
+}
+
+function toggleDebugPanel() {
+    const panel = document.getElementById('debug-panel');
+    if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Add debug panel to the page
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.insertAdjacentHTML('beforeend', DEBUG_PANEL);
+    displayBooks();
+});
+
 async function fetchWithRetry(url, options, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
         try {
+            addDebugInfo(`Attempt ${i + 1} to fetch: ${url}`);
             const response = await fetch(url, options);
+            addDebugInfo(`Response status: ${response.status}`);
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response;
+            
+            const text = await response.text();
+            addDebugInfo(`Raw response: ${text.substring(0, 200)}...`);
+            
+            try {
+                return new Response(text);
+            } catch (e) {
+                addDebugInfo(`Error parsing response: ${e.message}`);
+                throw e;
+            }
         } catch (error) {
+            addDebugInfo(`Attempt ${i + 1} failed: ${error.message}`);
             if (i === maxRetries - 1) throw error;
             await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
         }
@@ -57,20 +108,21 @@ async function fetchBooks(endpoint) {
         while (hasMore) {
             const openLibraryUrl = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
             const url = `${CORS_PROXY}${encodeURIComponent(openLibraryUrl)}`;
-            console.log(`Fetching ${endpoint} books from:`, url);
+            addDebugInfo(`Fetching ${endpoint} books...`);
+            addDebugInfo(`User Agent: ${navigator.userAgent}`);
             
             const response = await fetchWithRetry(url, fetchOptions);
             const data = await response.json();
-            console.log(`${endpoint} response:`, data);
+            addDebugInfo(`${endpoint} response: ${JSON.stringify(data).substring(0, 200)}...`);
             
             if (!data.reading_log_entries || data.reading_log_entries.length === 0) {
-                console.log(`No books found for ${endpoint}`);
+                addDebugInfo(`No books found for ${endpoint}`);
                 hasMore = false;
                 continue;
             }
 
             allBooks = allBooks.concat(data.reading_log_entries);
-            console.log(`Total books for ${endpoint}:`, allBooks.length);
+            addDebugInfo(`Total books for ${endpoint}: ${allBooks.length}`);
             
             if (allBooks.length >= data.numFound) {
                 hasMore = false;
@@ -80,7 +132,7 @@ async function fetchBooks(endpoint) {
         }
         return allBooks;
     } catch (error) {
-        console.error(`Error fetching ${endpoint} books:`, error);
+        addDebugInfo(`Error fetching ${endpoint} books: ${error.message}`);
         return [];
     }
 }
@@ -228,6 +280,9 @@ function setupLazyLoading() {
 }
 
 async function displayBooks() {
+    addDebugInfo('Starting displayBooks function');
+    addDebugInfo(`Browser info: ${navigator.userAgent}`);
+
     const sections = [
         { id: 'currently-reading', endpoint: 'currently-reading' },
         { id: 'want-to-read', endpoint: 'want-to-read' },
@@ -238,6 +293,7 @@ async function displayBooks() {
     sections.forEach(section => {
         const container = document.getElementById(section.id);
         if (container) {
+            addDebugInfo(`Setting loading state for ${section.id}`);
             container.innerHTML = `
                 <div class="loading-container">
                     <div class="cyber-loader">
@@ -246,15 +302,17 @@ async function displayBooks() {
                     </div>
                 </div>
             `;
+        } else {
+            addDebugInfo(`Container not found for ${section.id}`);
         }
     });
 
     try {
-        // Fetch all sections in parallel with retry logic
+        addDebugInfo('Starting parallel fetch for all sections');
         const fetchPromises = sections.map(section => 
             fetchBooks(section.endpoint)
                 .then(books => {
-                    console.log(`Books fetched for ${section.endpoint}:`, books.length);
+                    addDebugInfo(`Books fetched for ${section.endpoint}: ${books.length}`);
                     return {
                         id: section.id,
                         books: books
@@ -263,18 +321,18 @@ async function displayBooks() {
         );
 
         const results = await Promise.all(fetchPromises);
-        console.log('All results:', results);
+        addDebugInfo(`All results: ${JSON.stringify(results).substring(0, 200)}...`);
         
         // Update each section with its books
         results.forEach(({ id, books }) => {
             const container = document.getElementById(id);
             if (!container) {
-                console.error(`Container not found for ${id}`);
+                addDebugInfo(`Container not found for ${id}`);
                 return;
             }
             
             if (books.length === 0) {
-                console.log(`No books found for ${id}`);
+                addDebugInfo(`No books found for ${id}`);
                 container.innerHTML = `
                     <div class="loading-container">
                         <div class="cyber-loader">
@@ -283,7 +341,7 @@ async function displayBooks() {
                     </div>
                 `;
             } else {
-                console.log(`Rendering ${books.length} books for ${id}`);
+                addDebugInfo(`Rendering ${books.length} books for ${id}`);
                 const bookCards = books.map((book, index) => createBookCard(book, index)).join('');
                 container.innerHTML = `
                     <div class="books-grid">
@@ -293,10 +351,10 @@ async function displayBooks() {
             }
         });
 
-        // Setup lazy loading after all cards are rendered
+        addDebugInfo('Setting up lazy loading');
         setupLazyLoading();
     } catch (error) {
-        console.error('Error in displayBooks:', error);
+        addDebugInfo(`Error in displayBooks: ${error.message}`);
         sections.forEach(section => {
             const container = document.getElementById(section.id);
             if (container) {
@@ -310,7 +368,4 @@ async function displayBooks() {
             }
         });
     }
-}
-
-// Initialize the page
-document.addEventListener('DOMContentLoaded', displayBooks); 
+} 
