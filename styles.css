@@ -13,13 +13,15 @@ body {
 }
 
 header {
-    background: #1a1a1a;
+    background: rgba(26, 26, 26, 0.95);
     text-align: center;
     padding: 2rem 1rem;
     position: relative;
-    z-index: 10;
+    z-index: 2;
     width: 100%;
     box-sizing: border-box;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 header h1 {
@@ -37,13 +39,16 @@ header p {
     padding: 0 1rem;
     flex: 1;
     position: relative;
-    z-index: 10;
+    z-index: 2;
     width: 100%;
     box-sizing: border-box;
+    background: rgba(18, 18, 18, 0);
 }
 
 .section {
     margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: 8px;
 }
 
 h2 {
@@ -59,11 +64,13 @@ p {
 footer {
     text-align: center;
     padding: 1.5rem 0;
-    background: #1a1a1a;
+    background: rgba(26, 26, 26, 0.95);
     position: relative;
-    z-index: 10;
+    z-index: 2;
     width: 100%;
     box-sizing: border-box;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 a {
@@ -282,12 +289,12 @@ a:hover {
 }
 
 .binary-code {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    z-index: 1;
+    height: 100vh;
+    z-index: 0;
     pointer-events: none;
     overflow: hidden;
 }
