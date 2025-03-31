@@ -1,7 +1,5 @@
 const OPENLIBRARY_BASE_URL = 'https://openlibrary.org';
 const COVER_BASE_URL = 'https://covers.openlibrary.org/b/id/';
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
-const BOOKS_PER_PAGE = 100;
 
 const headers = new Headers({
     "User-Agent": "ArnabChandaPortfolio/1.0 (arnabchanda964@gmail.com)",
@@ -91,7 +89,7 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
 
 async function fetchBookDetails(workKey) {
     try {
-        const url = `${CORS_PROXY}${encodeURIComponent(`${OPENLIBRARY_BASE_URL}${workKey}.json`)}`;
+        const url = `${OPENLIBRARY_BASE_URL}${workKey}.json`;
         const response = await fetchWithRetry(url, fetchOptions);
         const data = await response.json();
         return {
@@ -99,7 +97,7 @@ async function fetchBookDetails(workKey) {
             subjects: data.subjects || []
         };
     } catch (error) {
-        console.error('Error fetching book details:', error);
+        addDebugInfo(`Error fetching book details: ${error.message}`);
         return {
             description: 'No description available',
             subjects: []
@@ -114,8 +112,7 @@ async function fetchBooks(endpoint) {
         let hasMore = true;
 
         while (hasMore) {
-            const openLibraryUrl = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
-            const url = `${CORS_PROXY}${encodeURIComponent(openLibraryUrl)}`;
+            const url = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
             addDebugInfo(`Fetching ${endpoint} books...`);
             addDebugInfo(`User Agent: ${navigator.userAgent}`);
             
