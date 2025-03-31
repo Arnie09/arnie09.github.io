@@ -1,5 +1,6 @@
 const OPENLIBRARY_BASE_URL = 'https://openlibrary.org';
 const COVER_BASE_URL = 'https://covers.openlibrary.org/b/id/';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 const BOOKS_PER_PAGE = 100;
 
 const headers = new Headers({
@@ -15,7 +16,8 @@ const fetchOptions = {
 
 async function fetchBookDetails(workKey) {
     try {
-        const response = await fetch(`${OPENLIBRARY_BASE_URL}${workKey}.json`, fetchOptions);
+        const url = `${CORS_PROXY}${encodeURIComponent(`${OPENLIBRARY_BASE_URL}${workKey}.json`)}`;
+        const response = await fetch(url, fetchOptions);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -40,7 +42,8 @@ async function fetchBooks(endpoint) {
         let hasMore = true;
 
         while (hasMore) {
-            const url = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
+            const openLibraryUrl = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
+            const url = `${CORS_PROXY}${encodeURIComponent(openLibraryUrl)}`;
             console.log(`Fetching ${endpoint} books from:`, url);
             
             const response = await fetch(url, fetchOptions);
