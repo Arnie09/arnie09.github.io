@@ -11,16 +11,29 @@ const headers = new Headers({
 const fetchOptions = {
     method: 'GET',
     headers: headers,
-    mode: 'cors'
+    mode: 'cors',
+    cache: 'no-cache'
 };
+
+async function fetchWithRetry(url, options, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response;
+        } catch (error) {
+            if (i === maxRetries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
+    }
+}
 
 async function fetchBookDetails(workKey) {
     try {
         const url = `${CORS_PROXY}${encodeURIComponent(`${OPENLIBRARY_BASE_URL}${workKey}.json`)}`;
-        const response = await fetch(url, fetchOptions);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetchWithRetry(url, fetchOptions);
         const data = await response.json();
         return {
             description: data.description?.value || data.description || 'No description available',
@@ -46,12 +59,7 @@ async function fetchBooks(endpoint) {
             const url = `${CORS_PROXY}${encodeURIComponent(openLibraryUrl)}`;
             console.log(`Fetching ${endpoint} books from:`, url);
             
-            const response = await fetch(url, fetchOptions);
-            if (!response.ok) {
-                console.error(`HTTP error! status: ${response.status}`);
-                return [];
-            }
-            
+            const response = await fetchWithRetry(url, fetchOptions);
             const data = await response.json();
             console.log(`${endpoint} response:`, data);
             
@@ -229,29 +237,31 @@ async function displayBooks() {
     // Set loading state for all sections
     sections.forEach(section => {
         const container = document.getElementById(section.id);
-        container.innerHTML = `
-            <div class="loading-container">
-                <div class="cyber-loader">
-                    <div class="cyber-loader__inner"></div>
-                    <div class="cyber-loader__text">Loading books...</div>
+        if (container) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="cyber-loader">
+                        <div class="cyber-loader__inner"></div>
+                        <div class="cyber-loader__text">Loading books...</div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     });
 
-    // Fetch all sections in parallel
-    const fetchPromises = sections.map(section => 
-        fetchBooks(section.endpoint)
-            .then(books => {
-                console.log(`Books fetched for ${section.endpoint}:`, books.length);
-                return {
-                    id: section.id,
-                    books: books
-                };
-            })
-    );
-
     try {
+        // Fetch all sections in parallel with retry logic
+        const fetchPromises = sections.map(section => 
+            fetchBooks(section.endpoint)
+                .then(books => {
+                    console.log(`Books fetched for ${section.endpoint}:`, books.length);
+                    return {
+                        id: section.id,
+                        books: books
+                    };
+                })
+        );
+
         const results = await Promise.all(fetchPromises);
         console.log('All results:', results);
         
