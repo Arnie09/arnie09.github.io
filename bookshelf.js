@@ -13,73 +13,26 @@ const fetchOptions = {
     cache: 'no-cache'
 };
 
-// Add debug panel HTML at the start of the file
-const DEBUG_PANEL = `
-    <div id="debug-panel" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); color: #00ff00; padding: 10px; max-height: 30vh; overflow-y: auto; z-index: 9999; font-family: monospace; font-size: 14px; border-top: 2px solid #00ff00;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: sticky; top: 0; background: rgba(0,0,0,0.95); padding: 5px;">
-            <h3 style="margin: 0; color: #00ff00;">Debug Info</h3>
-            <button onclick="toggleDebugPanel()" style="background: #00ff00; color: black; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px;">Toggle</button>
-        </div>
-        <div id="debug-content" style="font-size: 12px; line-height: 1.4;"></div>
-    </div>
-`;
-
-// Add debug panel functions
-function addDebugInfo(message) {
-    const debugContent = document.getElementById('debug-content');
-    if (debugContent) {
-        const entry = document.createElement('div');
-        entry.style.marginBottom = '8px';
-        entry.style.padding = '8px';
-        entry.style.borderBottom = '1px solid rgba(0,255,0,0.2)';
-        entry.style.wordBreak = 'break-all';
-        entry.textContent = message;
-        debugContent.appendChild(entry);
-        debugContent.scrollTop = debugContent.scrollHeight;
-    }
-}
-
-function toggleDebugPanel() {
-    const panel = document.getElementById('debug-panel');
-    if (panel) {
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    }
-}
-
-// Add debug panel to the page
-document.addEventListener('DOMContentLoaded', () => {
-    document.body.insertAdjacentHTML('beforeend', DEBUG_PANEL);
-    setTimeout(() => {
-        const panel = document.getElementById('debug-panel');
-        if (panel) {
-            panel.style.display = 'block';
-        }
-    }, 100);
-    loadBooks();
-});
+// Initialize the page
+document.addEventListener('DOMContentLoaded', loadBooks);
 
 async function fetchWithRetry(url, options, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
         try {
-            addDebugInfo(`Attempt ${i + 1} to fetch: ${url}`);
             const response = await fetch(url, options);
-            addDebugInfo(`Response status: ${response.status}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const text = await response.text();
-            addDebugInfo(`Raw response: ${text.substring(0, 200)}...`);
             
             try {
                 return new Response(text);
             } catch (e) {
-                addDebugInfo(`Error parsing response: ${e.message}`);
                 throw e;
             }
         } catch (error) {
-            addDebugInfo(`Attempt ${i + 1} failed: ${error.message}`);
             if (i === maxRetries - 1) throw error;
             await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
         }
@@ -96,7 +49,6 @@ async function fetchBookDetails(workKey) {
             subjects: data.subjects || []
         };
     } catch (error) {
-        addDebugInfo(`Error fetching book details: ${error.message}`);
         return {
             description: 'No description available',
             subjects: []
@@ -106,7 +58,6 @@ async function fetchBookDetails(workKey) {
 
 function createBookCard(book) {
     if (!book.work) {
-        addDebugInfo('Invalid book data: ' + JSON.stringify(book));
         return '';
     }
 
@@ -145,28 +96,20 @@ function createBookCard(book) {
 async function fetchBooks(endpoint) {
     try {
         const url = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
-        addDebugInfo(`Fetching ${endpoint} books from: ${url}`);
-        
         const response = await fetch(url);
-        addDebugInfo(`Response status: ${response.status}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        addDebugInfo(`Found ${data.reading_log_entries?.length || 0} books for ${endpoint}`);
-        
         return data.reading_log_entries || [];
     } catch (error) {
-        addDebugInfo(`Error fetching ${endpoint} books: ${error.message}`);
         return [];
     }
 }
 
 async function loadBooks() {
-    addDebugInfo('Starting to load books...');
-    
     const sections = [
         { id: 'currently-reading', endpoint: 'currently-reading' },
         { id: 'want-to-read', endpoint: 'want-to-read' },
@@ -190,7 +133,6 @@ async function loadBooks() {
 
     // Load books sequentially
     for (const section of sections) {
-        addDebugInfo(`Loading ${section.endpoint} books...`);
         const books = await fetchBooks(section.endpoint);
         
         const container = document.getElementById(section.id);
@@ -286,7 +228,6 @@ async function showBookModal(book) {
             <p class="modal-description">${details.description}</p>
         `;
     } catch (error) {
-        console.error('Error fetching book details:', error);
         const detailsContainer = modalContent.querySelector('.modal-details');
         detailsContainer.innerHTML = `
             <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
