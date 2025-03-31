@@ -77,16 +77,18 @@ function createBookCard(book, index) {
 
     const year = book.work.first_publish_year || book.work.first_publish_date?.split('-')[0] || 'Unknown';
     
-    // Preload first 4 images for LCP optimization
-    const loading = index < 4 ? 'eager' : 'lazy';
+    // For first 4 images, use eager loading and start with the medium size
+    const isFirstFour = index < 4;
+    const initialSrc = isFirstFour ? coverUrl : thumbnailUrl;
+    const loading = isFirstFour ? 'eager' : 'lazy';
     
     return `
         <div class="book-card">
             <div class="book-cover-container">
                 <img 
-                    class="book-cover"
-                    src="${thumbnailUrl}"
-                    data-src="${coverUrl}"
+                    class="book-cover${isFirstFour ? ' loaded' : ''}"
+                    src="${initialSrc}"
+                    ${!isFirstFour ? `data-src="${coverUrl}"` : ''}
                     alt="${book.work.title}"
                     loading="${loading}"
                     width="180"
