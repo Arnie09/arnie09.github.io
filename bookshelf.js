@@ -79,15 +79,15 @@ function createBookCard(book) {
                     height="250"
                     onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'"
                 >
-            </div>
-            <div class="book-info">
-                <h3 class="book-title">${book.work.title}</h3>
-                <p class="book-author">${book.work.author_names.join(', ')}</p>
                 <button class="info-icon" onclick="showBookModal(${JSON.stringify(book).replace(/"/g, '&quot;')})" aria-label="View book details">
                     <svg viewBox="0 0 24 24" width="24" height="24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                     </svg>
                 </button>
+            </div>
+            <div class="book-info">
+                <h3 class="book-title">${book.work.title}</h3>
+                <p class="book-author">${book.work.author_names.join(', ')}</p>
             </div>
         </div>
     `;
