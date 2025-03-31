@@ -17,12 +17,12 @@ const fetchOptions = {
 
 // Add debug panel HTML at the start of the file
 const DEBUG_PANEL = `
-    <div id="debug-panel" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); color: #00ff00; padding: 10px; max-height: 50vh; overflow-y: auto; z-index: 9999; font-family: monospace; font-size: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin: 0;">Debug Info</h3>
-            <button onclick="toggleDebugPanel()" style="background: #00ff00; color: black; border: none; padding: 5px 10px; cursor: pointer;">Toggle</button>
+    <div id="debug-panel" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); color: #00ff00; padding: 10px; max-height: 30vh; overflow-y: auto; z-index: 9999; font-family: monospace; font-size: 14px; border-top: 2px solid #00ff00;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: sticky; top: 0; background: rgba(0,0,0,0.95); padding: 5px;">
+            <h3 style="margin: 0; color: #00ff00;">Debug Info</h3>
+            <button onclick="toggleDebugPanel()" style="background: #00ff00; color: black; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px;">Toggle</button>
         </div>
-        <div id="debug-content"></div>
+        <div id="debug-content" style="font-size: 12px; line-height: 1.4;"></div>
     </div>
 `;
 
@@ -31,9 +31,10 @@ function addDebugInfo(message) {
     const debugContent = document.getElementById('debug-content');
     if (debugContent) {
         const entry = document.createElement('div');
-        entry.style.marginBottom = '5px';
-        entry.style.padding = '5px';
+        entry.style.marginBottom = '8px';
+        entry.style.padding = '8px';
         entry.style.borderBottom = '1px solid rgba(0,255,0,0.2)';
+        entry.style.wordBreak = 'break-all';
         entry.textContent = message;
         debugContent.appendChild(entry);
         debugContent.scrollTop = debugContent.scrollHeight;
@@ -50,6 +51,13 @@ function toggleDebugPanel() {
 // Add debug panel to the page
 document.addEventListener('DOMContentLoaded', () => {
     document.body.insertAdjacentHTML('beforeend', DEBUG_PANEL);
+    // Add a small delay to ensure the panel is visible
+    setTimeout(() => {
+        const panel = document.getElementById('debug-panel');
+        if (panel) {
+            panel.style.display = 'block';
+        }
+    }, 100);
     displayBooks();
 });
 
