@@ -49,14 +49,13 @@ function toggleDebugPanel() {
 // Add debug panel to the page
 document.addEventListener('DOMContentLoaded', () => {
     document.body.insertAdjacentHTML('beforeend', DEBUG_PANEL);
-    // Add a small delay to ensure the panel is visible
     setTimeout(() => {
         const panel = document.getElementById('debug-panel');
         if (panel) {
             panel.style.display = 'block';
         }
     }, 100);
-    displayBooks();
+    loadBooks();
 });
 
 async function fetchWithRetry(url, options, maxRetries = 3) {
@@ -105,73 +104,26 @@ async function fetchBookDetails(workKey) {
     }
 }
 
-async function fetchBooks(endpoint) {
-    try {
-        let allBooks = [];
-        let page = 1;
-        let hasMore = true;
-
-        while (hasMore) {
-            const url = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
-            addDebugInfo(`Fetching ${endpoint} books...`);
-            addDebugInfo(`User Agent: ${navigator.userAgent}`);
-            
-            const response = await fetchWithRetry(url, fetchOptions);
-            const data = await response.json();
-            addDebugInfo(`${endpoint} response: ${JSON.stringify(data).substring(0, 200)}...`);
-            
-            if (!data.reading_log_entries || data.reading_log_entries.length === 0) {
-                addDebugInfo(`No books found for ${endpoint}`);
-                hasMore = false;
-                continue;
-            }
-
-            allBooks = allBooks.concat(data.reading_log_entries);
-            addDebugInfo(`Total books for ${endpoint}: ${allBooks.length}`);
-            
-            if (allBooks.length >= data.numFound) {
-                hasMore = false;
-            } else {
-                page++;
-            }
-        }
-        return allBooks;
-    } catch (error) {
-        addDebugInfo(`Error fetching ${endpoint} books: ${error.message}`);
-        return [];
-    }
-}
-
-function createBookCard(book, index) {
+function createBookCard(book) {
     if (!book.work) {
-        console.error('Invalid book data:', book);
+        addDebugInfo('Invalid book data: ' + JSON.stringify(book));
         return '';
     }
 
     const coverId = book.work.cover_id;
-    const coverUrl = coverId 
-        ? `${COVER_BASE_URL}${coverId}-M.jpg`
-        : 'https://via.placeholder.com/300x400?text=No+Cover';
-    const thumbnailUrl = coverId 
-        ? `${COVER_BASE_URL}${coverId}-S.jpg`
-        : 'https://via.placeholder.com/50x75?text=No+Cover';
-
+    const coverUrl = coverId ? `${COVER_BASE_URL}${coverId}-M.jpg` : 'https://via.placeholder.com/300x400?text=No+Cover';
+    const thumbnailUrl = coverId ? `${COVER_BASE_URL}${coverId}-S.jpg` : 'https://via.placeholder.com/50x75?text=No+Cover';
     const year = book.work.first_publish_year || book.work.first_publish_date?.split('-')[0] || 'Unknown';
-    
-    // For first 4 images, use eager loading and start with the medium size
-    const isFirstFour = index < 4;
-    const initialSrc = isFirstFour ? coverUrl : thumbnailUrl;
-    const loading = isFirstFour ? 'eager' : 'lazy';
     
     return `
         <div class="book-card">
             <div class="book-cover-container">
                 <img 
-                    class="book-cover${isFirstFour ? ' loaded' : ''}"
-                    src="${initialSrc}"
-                    ${!isFirstFour ? `data-src="${coverUrl}"` : ''}
+                    class="book-cover"
+                    src="${thumbnailUrl}"
+                    data-src="${coverUrl}"
                     alt="${book.work.title}"
-                    loading="${loading}"
+                    loading="lazy"
                     width="180"
                     height="250"
                     onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'"
@@ -188,6 +140,98 @@ function createBookCard(book, index) {
             </div>
         </div>
     `;
+}
+
+async function fetchBooks(endpoint) {
+    try {
+        const url = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
+        addDebugInfo(`Fetching ${endpoint} books from: ${url}`);
+        
+        const response = await fetch(url);
+        addDebugInfo(`Response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        addDebugInfo(`Found ${data.reading_log_entries?.length || 0} books for ${endpoint}`);
+        
+        return data.reading_log_entries || [];
+    } catch (error) {
+        addDebugInfo(`Error fetching ${endpoint} books: ${error.message}`);
+        return [];
+    }
+}
+
+async function loadBooks() {
+    addDebugInfo('Starting to load books...');
+    
+    const sections = [
+        { id: 'currently-reading', endpoint: 'currently-reading' },
+        { id: 'want-to-read', endpoint: 'want-to-read' },
+        { id: 'already-read', endpoint: 'already-read' }
+    ];
+
+    // Set loading state for all sections
+    sections.forEach(section => {
+        const container = document.getElementById(section.id);
+        if (container) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="cyber-loader">
+                        <div class="cyber-loader__inner"></div>
+                        <div class="cyber-loader__text">Loading books...</div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    // Load books sequentially
+    for (const section of sections) {
+        addDebugInfo(`Loading ${section.endpoint} books...`);
+        const books = await fetchBooks(section.endpoint);
+        
+        const container = document.getElementById(section.id);
+        if (!container) continue;
+
+        if (books.length === 0) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="cyber-loader">
+                        <div class="cyber-loader__text">No books found</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            const bookCards = books.map(book => createBookCard(book)).join('');
+            container.innerHTML = `
+                <div class="books-grid">
+                    ${bookCards}
+                </div>
+            `;
+        }
+    }
+
+    // Set up lazy loading after all books are loaded
+    setupLazyLoading();
+}
+
+function setupLazyLoading() {
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.add('loaded');
+                imageObserver.unobserve(img);
+            }
+        });
+    });
+
+    lazyImages.forEach(img => imageObserver.observe(img));
 }
 
 async function showBookModal(book) {
@@ -265,112 +309,4 @@ async function showBookModal(book) {
             document.body.style.overflow = ''; // Restore scrolling
         }
     });
-}
-
-function setupLazyLoading() {
-    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-    
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.add('loaded');
-                observer.unobserve(img);
-            }
-        });
-    });
-
-    lazyImages.forEach(img => imageObserver.observe(img));
-}
-
-async function displayBooks() {
-    addDebugInfo('Starting displayBooks function');
-    addDebugInfo(`Browser info: ${navigator.userAgent}`);
-
-    const sections = [
-        { id: 'currently-reading', endpoint: 'currently-reading' },
-        { id: 'want-to-read', endpoint: 'want-to-read' },
-        { id: 'already-read', endpoint: 'already-read' }
-    ];
-
-    // Set loading state for all sections
-    sections.forEach(section => {
-        const container = document.getElementById(section.id);
-        if (container) {
-            addDebugInfo(`Setting loading state for ${section.id}`);
-            container.innerHTML = `
-                <div class="loading-container">
-                    <div class="cyber-loader">
-                        <div class="cyber-loader__inner"></div>
-                        <div class="cyber-loader__text">Loading books...</div>
-                    </div>
-                </div>
-            `;
-        } else {
-            addDebugInfo(`Container not found for ${section.id}`);
-        }
-    });
-
-    try {
-        addDebugInfo('Starting parallel fetch for all sections');
-        const fetchPromises = sections.map(section => 
-            fetchBooks(section.endpoint)
-                .then(books => {
-                    addDebugInfo(`Books fetched for ${section.endpoint}: ${books.length}`);
-                    return {
-                        id: section.id,
-                        books: books
-                    };
-                })
-        );
-
-        const results = await Promise.all(fetchPromises);
-        addDebugInfo(`All results: ${JSON.stringify(results).substring(0, 200)}...`);
-        
-        // Update each section with its books
-        results.forEach(({ id, books }) => {
-            const container = document.getElementById(id);
-            if (!container) {
-                addDebugInfo(`Container not found for ${id}`);
-                return;
-            }
-            
-            if (books.length === 0) {
-                addDebugInfo(`No books found for ${id}`);
-                container.innerHTML = `
-                    <div class="loading-container">
-                        <div class="cyber-loader">
-                            <div class="cyber-loader__text">No books found</div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                addDebugInfo(`Rendering ${books.length} books for ${id}`);
-                const bookCards = books.map((book, index) => createBookCard(book, index)).join('');
-                container.innerHTML = `
-                    <div class="books-grid">
-                        ${bookCards}
-                    </div>
-                `;
-            }
-        });
-
-        addDebugInfo('Setting up lazy loading');
-        setupLazyLoading();
-    } catch (error) {
-        addDebugInfo(`Error in displayBooks: ${error.message}`);
-        sections.forEach(section => {
-            const container = document.getElementById(section.id);
-            if (container) {
-                container.innerHTML = `
-                    <div class="loading-container">
-                        <div class="cyber-loader">
-                            <div class="cyber-loader__text">Error loading books</div>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-    }
 } 
