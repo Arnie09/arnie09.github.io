@@ -3,17 +3,22 @@ const COVER_BASE_URL = 'https://covers.openlibrary.org/b/id/';
 const BOOKS_PER_PAGE = 100;
 
 const headers = new Headers({
-    "User-Agent": "ArnabChandaPortfolio/1.0 (arnabchanda964@gmail.com)"
+    "User-Agent": "ArnabChandaPortfolio/1.0 (arnabchanda964@gmail.com)",
+    "Accept": "application/json"
 });
 
 const fetchOptions = {
     method: 'GET',
-    headers: headers
+    headers: headers,
+    mode: 'cors'
 };
 
 async function fetchBookDetails(workKey) {
     try {
         const response = await fetch(`${OPENLIBRARY_BASE_URL}${workKey}.json`, fetchOptions);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         return {
             description: data.description?.value || data.description || 'No description available',
@@ -35,18 +40,26 @@ async function fetchBooks(endpoint) {
         let hasMore = true;
 
         while (hasMore) {
-            const response = await fetch(
-                `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`,
-                fetchOptions
-            );
+            const url = `${OPENLIBRARY_BASE_URL}/people/pumpkindumplin/books/${endpoint}.json?page=${page}&fields=work.title,work.author_names,work.cover_id,work.key,work.first_publish_year,work.first_publish_date`;
+            console.log(`Fetching ${endpoint} books from:`, url);
+            
+            const response = await fetch(url, fetchOptions);
+            if (!response.ok) {
+                console.error(`HTTP error! status: ${response.status}`);
+                return [];
+            }
+            
             const data = await response.json();
+            console.log(`${endpoint} response:`, data);
             
             if (!data.reading_log_entries || data.reading_log_entries.length === 0) {
+                console.log(`No books found for ${endpoint}`);
                 hasMore = false;
                 continue;
             }
 
             allBooks = allBooks.concat(data.reading_log_entries);
+            console.log(`Total books for ${endpoint}:`, allBooks.length);
             
             if (allBooks.length >= data.numFound) {
                 hasMore = false;
@@ -226,19 +239,29 @@ async function displayBooks() {
     // Fetch all sections in parallel
     const fetchPromises = sections.map(section => 
         fetchBooks(section.endpoint)
-            .then(books => ({
-                id: section.id,
-                books: books
-            }))
+            .then(books => {
+                console.log(`Books fetched for ${section.endpoint}:`, books.length);
+                return {
+                    id: section.id,
+                    books: books
+                };
+            })
     );
 
     try {
         const results = await Promise.all(fetchPromises);
+        console.log('All results:', results);
         
         // Update each section with its books
         results.forEach(({ id, books }) => {
             const container = document.getElementById(id);
+            if (!container) {
+                console.error(`Container not found for ${id}`);
+                return;
+            }
+            
             if (books.length === 0) {
+                console.log(`No books found for ${id}`);
                 container.innerHTML = `
                     <div class="loading-container">
                         <div class="cyber-loader">
@@ -247,6 +270,7 @@ async function displayBooks() {
                     </div>
                 `;
             } else {
+                console.log(`Rendering ${books.length} books for ${id}`);
                 const bookCards = books.map((book, index) => createBookCard(book, index)).join('');
                 container.innerHTML = `
                     <div class="books-grid">
@@ -259,16 +283,18 @@ async function displayBooks() {
         // Setup lazy loading after all cards are rendered
         setupLazyLoading();
     } catch (error) {
-        console.error('Error fetching books:', error);
+        console.error('Error in displayBooks:', error);
         sections.forEach(section => {
             const container = document.getElementById(section.id);
-            container.innerHTML = `
-                <div class="loading-container">
-                    <div class="cyber-loader">
-                        <div class="cyber-loader__text">Error loading books</div>
+            if (container) {
+                container.innerHTML = `
+                    <div class="loading-container">
+                        <div class="cyber-loader">
+                            <div class="cyber-loader__text">Error loading books</div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         });
     }
 }

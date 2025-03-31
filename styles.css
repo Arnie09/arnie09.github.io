@@ -79,6 +79,7 @@ a:hover {
         max-width: 100%;
         margin: 1rem auto;
     }
+
     .section {
         margin-bottom: 1.5rem;
         width: 100%;
@@ -91,7 +92,7 @@ a:hover {
         font-size: 0.95rem;
         text-align: center;
     }
-    
+
     .books-grid {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 1rem;
@@ -100,17 +101,17 @@ a:hover {
         justify-items: center;
         max-width: 100%;
     }
-    
+
     .book-card {
         width: 140px;
         height: 350px;
     }
-    
+
     .book-cover-container {
         height: 200px;
         padding: 0.75rem;
     }
-    
+
     .book-info {
         height: 150px;
         padding: 0.75rem;
