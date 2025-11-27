@@ -6,7 +6,6 @@ A modern, fast, and responsive portfolio and blog website built with Jekyll. Fea
 
 - **Static Blog**: Write posts in Markdown with full Jekyll support
 - **Portfolio/About Page**: Showcase your experience and skills
-- **Bookshelf Integration**: Display books from Open Library
 - **Responsive Design**: Works beautifully on all devices
 - **Fast & Secure**: Static site generation for optimal performance
 - **SEO Optimized**: Built-in SEO tags and sitemap generation
@@ -21,8 +20,7 @@ arnie09.github.io/
 │   ├── default.html
 │   ├── home.html
 │   ├── post.html
-│   ├── blog.html
-│   └── bookshelf.html
+│   └── blog.html
 ├── _includes/            # Reusable components
 │   ├── header.html
 │   └── footer.html
@@ -31,12 +29,10 @@ arnie09.github.io/
 │   ├── css/
 │   │   └── main.css
 │   ├── js/
-│   │   ├── main.js
-│   │   └── bookshelf.js
+│   │   └── main.js
 │   └── images/
 ├── index.md              # Homepage
 ├── blog.md               # Blog listing page
-├── bookshelf.md          # Bookshelf page
 ├── CNAME                 # Custom domain (arnie09.xyz)
 ├── Gemfile               # Ruby dependencies
 └── README.md             # This file
@@ -156,14 +152,6 @@ Edit `assets/css/main.css` and update CSS variables:
     --text-secondary: #888;
     --border-color: rgba(0, 255, 0, 0.2);
 }
-```
-
-### Update Bookshelf
-
-Edit `assets/js/bookshelf.js` and change the Open Library username:
-
-```javascript
-const url = `${OPENLIBRARY_BASE_URL}/people/YOUR_USERNAME/books/${endpoint}.json`;
 ```
 
 ## 📱 Responsive Design

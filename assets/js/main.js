@@ -1,21 +1,3 @@
-// Binary code background animation
-(function() {
-    const binaryContainer = document.getElementById('binary-bg');
-    if (binaryContainer) {
-        const binaryChars = '01';
-        const numChars = window.innerWidth < 768 ? 150 : 300;
-        
-        for (let i = 0; i < numChars; i++) {
-            const span = document.createElement('span');
-            span.textContent = binaryChars[Math.floor(Math.random() * binaryChars.length)];
-            span.style.left = `${Math.random() * 100}%`;
-            span.style.top = `${Math.random() * 100}%`;
-            span.style.animationDelay = `${Math.random() * 4}s`;
-            binaryContainer.appendChild(span);
-        }
-    }
-})();
-
 // Mobile navigation toggle
 (function() {
     const navToggle = document.querySelector('.nav-toggle');

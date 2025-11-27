@@ -1,12 +1,4 @@
 <footer class="site-footer">
-    <div class="footer-content">
-        <p>&copy; {{ 'now' | date: "%Y" }} {{ site.title }}. All Rights Reserved.</p>
-        <p class="footer-links">
-            <a href="mailto:{{ site.email }}">Contact</a>
-            {% if site.feed %}
-                <a href="{{ '/feed.xml' | relative_url }}">RSS Feed</a>
-            {% endif %}
-        </p>
-    </div>
+    <p>{{ 'now' | date: "%Y" }} {{ site.title }}. All Rights Reserved.</p>
 </footer>
 
