@@ -13,8 +13,13 @@ const fetchOptions = {
     cache: 'no-cache'
 };
 
-// Initialize the page
-document.addEventListener('DOMContentLoaded', loadBooks);
+// Initialize bookshelf
+document.addEventListener('DOMContentLoaded', function() {
+    const bookshelfContainer = document.getElementById('bookshelf');
+    if (bookshelfContainer) {
+        loadBookshelf();
+    }
+});
 
 async function fetchWithRetry(url, options, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
@@ -25,13 +30,7 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const text = await response.text();
-            
-            try {
-                return new Response(text);
-            } catch (e) {
-                throw e;
-            }
+            return response;
         } catch (error) {
             if (i === maxRetries - 1) throw error;
             await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
@@ -63,27 +62,20 @@ function createBookCard(book) {
 
     const coverId = book.work.cover_id;
     const coverUrl = coverId ? `${COVER_BASE_URL}${coverId}-M.jpg` : 'https://via.placeholder.com/300x400?text=No+Cover';
-    const thumbnailUrl = coverId ? `${COVER_BASE_URL}${coverId}-S.jpg` : 'https://via.placeholder.com/50x75?text=No+Cover';
     const year = book.work.first_publish_year || book.work.first_publish_date?.split('-')[0] || 'Unknown';
     
+    const bookData = JSON.stringify(book).replace(/"/g, '&quot;');
+    
     return `
-        <div class="book-card">
+        <div class="book-card" onclick='showBookModal(${bookData})'>
             <div class="book-cover-container">
                 <img 
                     class="book-cover"
-                    src="${thumbnailUrl}"
-                    data-src="${coverUrl}"
+                    src="${coverUrl}"
                     alt="${book.work.title}"
                     loading="lazy"
-                    width="180"
-                    height="250"
                     onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'"
                 >
-                <button class="info-icon" onclick="showBookModal(${JSON.stringify(book).replace(/"/g, '&quot;')})" aria-label="View book details">
-                    <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                    </svg>
-                </button>
             </div>
             <div class="book-info">
                 <h3 class="book-title">${book.work.title}</h3>
@@ -105,75 +97,57 @@ async function fetchBooks(endpoint) {
         const data = await response.json();
         return data.reading_log_entries || [];
     } catch (error) {
+        console.error(`Error fetching ${endpoint}:`, error);
         return [];
     }
 }
 
-async function loadBooks() {
+async function loadBookshelf() {
     const sections = [
-        { id: 'currently-reading', endpoint: 'currently-reading' },
-        { id: 'want-to-read', endpoint: 'want-to-read' },
-        { id: 'already-read', endpoint: 'already-read' }
+        { id: 'currently-reading', title: 'Currently Reading', endpoint: 'currently-reading' },
+        { id: 'want-to-read', title: 'Want to Read', endpoint: 'want-to-read' },
+        { id: 'already-read', title: 'Already Read', endpoint: 'already-read' }
     ];
 
-    // Set loading state for all sections
-    sections.forEach(section => {
-        const container = document.getElementById(section.id);
-        if (container) {
-            container.innerHTML = `
-                <div class="loading-container">
-                    <div class="cyber-loader">
-                        <div class="cyber-loader__inner"></div>
-                        <div class="cyber-loader__text">Loading books...</div>
-                    </div>
-                </div>
-            `;
-        }
-    });
+    const bookshelfContainer = document.getElementById('bookshelf');
+    
+    // Show loading state
+    bookshelfContainer.innerHTML = `
+        <div class="loading-container">
+            <div class="cyber-loader">
+                <div class="cyber-loader__inner"></div>
+                <div class="cyber-loader__text">Loading books...</div>
+            </div>
+        </div>
+    `;
 
-    // Load books sequentially
+    let allBooksHtml = '';
+
+    // Load books for each section
     for (const section of sections) {
         const books = await fetchBooks(section.endpoint);
         
-        const container = document.getElementById(section.id);
-        if (!container) continue;
-
-        if (books.length === 0) {
-            container.innerHTML = `
-                <div class="loading-container">
-                    <div class="cyber-loader">
-                        <div class="cyber-loader__text">No books found</div>
+        if (books.length > 0) {
+            const bookCards = books.map(book => createBookCard(book)).join('');
+            allBooksHtml += `
+                <div class="books-section">
+                    <h2>${section.title}</h2>
+                    <div class="books-grid">
+                        ${bookCards}
                     </div>
                 </div>
             `;
         } else {
-            const bookCards = books.map(book => createBookCard(book)).join('');
-            container.innerHTML = `
-                <div class="books-grid">
-                    ${bookCards}
+            allBooksHtml += `
+                <div class="books-section">
+                    <h2>${section.title}</h2>
+                    <p style="color: var(--text-secondary);">No books found</p>
                 </div>
             `;
         }
     }
 
-    // Set up lazy loading after all books are loaded
-    setupLazyLoading();
-}
-
-function setupLazyLoading() {
-    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.add('loaded');
-                imageObserver.unobserve(img);
-            }
-        });
-    });
-
-    lazyImages.forEach(img => imageObserver.observe(img));
+    bookshelfContainer.innerHTML = allBooksHtml;
 }
 
 async function showBookModal(book) {
@@ -185,7 +159,6 @@ async function showBookModal(book) {
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
     
-    // Get the existing cover image URL from the book card
     const coverId = book.work.cover_id;
     const coverUrl = coverId 
         ? `${COVER_BASE_URL}${coverId}-M.jpg`
@@ -224,7 +197,7 @@ async function showBookModal(book) {
         detailsContainer.innerHTML = `
             <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
             <p class="modal-year">Published: ${year}</p>
-            <p class="modal-subjects">Genres: ${details.subjects.slice(0, 3).join(', ')}</p>
+            ${details.subjects.length > 0 ? `<p class="modal-subjects">Genres: ${details.subjects.slice(0, 5).join(', ')}</p>` : ''}
             <p class="modal-description">${details.description}</p>
         `;
     } catch (error) {
@@ -232,8 +205,7 @@ async function showBookModal(book) {
         detailsContainer.innerHTML = `
             <p class="modal-author">By ${book.work.author_names.join(', ')}</p>
             <p class="modal-year">Published: ${year}</p>
-            <p class="modal-subjects">Genres: Not available</p>
-            <p class="modal-description">No description available</p>
+            <p class="modal-description">No additional details available</p>
         `;
     }
     
@@ -241,13 +213,14 @@ async function showBookModal(book) {
     const closeBtn = modalContainer.querySelector('.close-modal');
     closeBtn.addEventListener('click', () => {
         modalContainer.remove();
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = '';
     });
     
     modalContainer.addEventListener('click', (e) => {
         if (e.target === modalContainer) {
             modalContainer.remove();
-            document.body.style.overflow = ''; // Restore scrolling
+            document.body.style.overflow = '';
         }
     });
-} 
+}
+

@@ -1,0 +1,59 @@
+# Site settings
+title: Arnab Chanda
+email: arnabchanda964@gmail.com
+description: >-
+  Senior Software Engineer specializing in Ruby on Rails, Django, and React.
+  Building scalable web applications in sales tech, gaming, and medical domains.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+github_username: Arnie09
+linkedin_username: arnab-chanda-aa671017a
+instagram_username: arnaaabbb
+resume_url: "https://drive.google.com/file/d/1YD6E0iOtUriNArSJ4c7T3_cc5d39_3Jq/view?usp=sharing"
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-paginate
+
+# Permalink structure for blog posts
+permalink: /blog/:year/:month/:day/:title/
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README.md
+
+# Collections
+collections:
+  projects:
+    output: true
+    permalink: /projects/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Arnab Chanda"
+  - scope:
+      path: ""
+      type: "projects"
+    values:
+      layout: "project"
+
+# Pagination
+paginate: 10
+paginate_path: "/blog/page:num/"
+
