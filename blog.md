@@ -6,5 +6,6 @@ permalink: /blog/
 
 # Blog
 
-Welcome to my blog! Here I share my thoughts on software engineering, web development, and technology in general.
+Welcome to my blog! Here I share my thoughts on any random topic in general!
+
 
