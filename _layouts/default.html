@@ -24,6 +24,16 @@
 
     <!-- Feed -->
     {% feed_meta %}
+    
+    <!-- Theme Script to prevent FOUC -->
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
 </head>
 <body>
     <div class="binary-code" id="binary-bg"></div>
