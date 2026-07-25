@@ -80,3 +80,41 @@ if ('IntersectionObserver' in window) {
     });
 }
 
+// Theme toggle functionality
+(function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        if (theme === 'light') {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    }
+    
+    if (themeToggle) {
+        // Set initial icon based on current theme
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        if (currentTheme === 'light') {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+    }
+})();
+

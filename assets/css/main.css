@@ -177,6 +177,37 @@
     --text-shadow-lg: 0 0 var(--shadow-blur-md) var(--accent-glow-strong);
 }
 
+/* Light Theme */
+[data-theme="light"] {
+    --bg-dark: #fdfae5; /* yellowish white */
+    --bg-light: #f5f0ce; /* slightly different yellowish white */
+    --bg-overlay: rgba(253, 250, 229, 0.95);
+    --bg-overlay-light: rgba(253, 250, 229, 0.5);
+    --bg-overlay-dark: rgba(253, 250, 229, 0.98);
+    --bg-black-overlay: rgba(253, 250, 229, 0.2);
+    --bg-black-overlay-dark: rgba(253, 250, 229, 0.5);
+    --bg-black-overlay-darker: rgba(253, 250, 229, 0.8);
+    
+    --text-primary: #5c3a21; /* brown */
+    --text-secondary: #8b5a33; /* lighter brown */
+    
+    --primary-color: #5c3a21;
+    --primary-hover: #8b5a33;
+    --primary-dark: #3a2415;
+    
+    --border-color: rgba(92, 58, 33, 0.2);
+    --border-opaque: #5c3a21;
+    
+    --accent-light: rgba(92, 58, 33, 0.1);
+    --accent-medium: rgba(92, 58, 33, 0.2);
+    --accent-strong: rgba(92, 58, 33, 0.3);
+    --accent-glow: rgba(92, 58, 33, 0.1);
+    --accent-glow-strong: rgba(92, 58, 33, 0.2);
+    
+    --shadow-light: rgba(92, 58, 33, 0.1);
+    --shadow-medium: rgba(92, 58, 33, 0.2);
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -321,6 +352,25 @@ body {
     display: flex;
     gap: var(--spacing-md);
     align-items: center;
+}
+
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    border-radius: var(--radius-md);
+}
+
+.theme-toggle-btn:hover {
+    color: var(--primary-hover);
+    transform: scale(var(--scale-hover));
+    background: var(--accent-light);
 }
 
 .social-links a {
